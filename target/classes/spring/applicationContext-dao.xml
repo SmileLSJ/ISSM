@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	
+	xsi:schemaLocation=" 
+          http://www.springframework.org/schema/beans 
+          http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+          http://www.springframework.org/schema/tx 
+          http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+          http://www.springframework.org/schema/jdbc
+          http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd 
+          http://www.springframework.org/schema/context 
+          http://www.springframework.org/schema/context/spring-context-3.2.xsd 
+          http://mybatis.org/schema/mybatis-spring
+          http://mybatis.org/schema/mybatis-spring-1.2.xsd
+          http://www.springframework.org/schema/aop 
+          http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+   <!-- 加载配置文件方式一 -->
+   <!--  <context:property-placeholder location="classpath:db.properties"/> -->
+          
+    <!-- 加载配置文件方式二 -->      
+	<!-- <bean id="configProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">  
+       <property name="locations">  
+           <list>  
+               <value>classpath:db.properties</value>  
+           </list>  
+       </property>  
+    </bean>  
+    
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    	<property name="properties" ref="configProperties"/>
+    </bean> -->
+    
+    
+    <!-- 加载配置文件方式三 -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    	<property name="locations">
+    		<list>
+    			<value>classpath:db.properties</value>
+    		</list>
+    	</property>
+    </bean> 
+    
+    
+    <!-- 配置数据源 -->
+    <bean id="datasource" class="org.apache.commons.dbcp.BasicDataSource"
+    	destroy-method="close">
+    	<property name="driverClassName" value="${db.driver}"/>
+    	<property name="url" value="${db.url}"/>
+    	<property name="username" value="${db.username}"/>
+    	<property name="password" value="${db.password}"/>
+    </bean>
+	
+	<!-- 配置SqlSessionFactory，mybatis全局配置文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="datasource"/>
+		
+		<!-- 查询mapper.xml文档的位置 -->
+		<property name="mapperLocations">
+			<list>
+				<value>classpath*:com/learning/ssm/**/*.xml</value>
+			</list>
+		</property>
+		
+		<!-- 配置pojo类的，全局别名 -->
+		<property name="typeAliasesPackage" value="com.learning.ssm.pojo"/>
+	</bean>
+	
+	
+	<!-- mapper代理对象生成方式一 -->
+	<!-- <mybatis:scan base-package="com.learning.ssm.dao"/> -->
+	
+	
+	<!-- mapper代理对象的生产二，
+		虽然mapper中 需要sqlSession来操作mapperStatement但是，
+		该类会自动将名称为sqlSessionFactory的类自动注入进去，所以不需要显示指定-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.learning.ssm.dao"/>
+	</bean>
+	
+</beans>
